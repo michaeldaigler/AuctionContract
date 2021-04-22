@@ -76,11 +76,11 @@ contract Auction {
     function finalizeAuction() public {
         require(auctionState == AuctionState.Canceled || block.number > endBlock);
         require(msg.sender == owner || bids[msg.sender] > 0);
-        address recipient;
+        address payable recipient;
         uint value;
 
         if(auctionState == AuctionState.Canceled) {
-            recipient = msg.sender;
+            recipient = payable(msg.sender);
             value; bids[msg.sender];
         } else {
             if(msg.sender == owner) {
@@ -88,16 +88,16 @@ contract Auction {
                 value = highestBindingBid;
             } else {
                 if(msg.sender == highestBidder) {
-                    recipient = highestBidder;
+                    recipient = payable(highestBidder);
                     value = bids[highestBidder];
                 } else {
-                    recipient = msg.sender;
+                    recipient =payable(msg.sender);
                     value = bids[msg.sender];
                 }
             }
         }
 
-
+       recipient.transfer(value);
 
     }
 
