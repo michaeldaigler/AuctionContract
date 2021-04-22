@@ -39,6 +39,11 @@ contract Auction {
         _;
     }
 
+    modifier ownlyOwner() {
+        require(msg.sender == owner);
+        _;
+    }
+
     function min(uint a, uint b) pure internal returns(uint){
         if (a <= b) {
             return a;
@@ -61,6 +66,38 @@ contract Auction {
             highestBidder = msg.sender;
         }
         return true;
+
+    }
+
+    function cancelAuction() public ownlyOwner {
+        auctionState = AuctionState.Canceled;
+    }
+
+    function finalizeAuction() public {
+        require(auctionState == AuctionState.Canceled || block.number > endBlock);
+        require(msg.sender == owner || bids[msg.sender] > 0);
+        address recipient;
+        uint value;
+
+        if(auctionState == AuctionState.Canceled) {
+            recipient = msg.sender;
+            value; bids[msg.sender];
+        } else {
+            if(msg.sender == owner) {
+                recipient =owner;
+                value = highestBindingBid;
+            } else {
+                if(msg.sender == highestBidder) {
+                    recipient = highestBidder;
+                    value = bids[highestBidder];
+                } else {
+                    recipient = msg.sender;
+                    value = bids[msg.sender];
+                }
+            }
+        }
+
+
 
     }
 
