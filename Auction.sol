@@ -1,5 +1,17 @@
 pragma solidity ^0.8.0;
 
+
+
+contract AutcionCreator {
+    address[] public auctions;
+
+    function createAuction() public {
+        address  newAuction = address(new Auction(msg.sender));
+        auctions.push(newAuction);
+
+    }
+}
+
 contract Auction {
     address payable public owner;
     uint public startBlock;
@@ -15,8 +27,8 @@ contract Auction {
     uint public bidIncrement;
 
     mapping(address => uint) public bids;
-    constructor() {
-        owner = payable(msg.sender);
+    constructor(address creator) {
+        owner = payable(creator);
         startBlock = block.number;
         endBlock = block.number + 40230;
         ipfsHash = "";
