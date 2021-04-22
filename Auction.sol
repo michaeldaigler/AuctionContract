@@ -11,7 +11,7 @@ contract Auction {
     AuctionState public auctionState;
 
     uint public highestBindingBid;
-    address public hihgestBidder;
+    address public highestBidder;
     uint public bidIncrement;
 
     mapping(address => uint) public bids;
@@ -38,6 +38,14 @@ contract Auction {
         require(block.number <= endBlock);
         _;
     }
+
+    function min(uint a, uint b) pure internal returns(uint){
+        if (a <= b) {
+            return a;
+        } else {
+            return b;
+        }
+    }
     function placeBid() payable public notOwner afterStart beforeEnd returns(bool){
         require(auctionState == AuctionState.Running);
         require(msg.value > 0.001 ether);
@@ -45,6 +53,14 @@ contract Auction {
 
         require(currentBid > highestBindingBid);
         bids[msg.sender] = currentBid;
+
+        if(currentBid <= bids[highestBidder]) {
+            highestBindingBid = min(currentBid + bidIncrement, bids[highestBidder]);
+        } else {
+            highestBindingBid = min(currentBid, bids[highestBidder] + bidIncrement);
+            highestBidder = msg.sender;
+        }
+        return true;
 
     }
 
