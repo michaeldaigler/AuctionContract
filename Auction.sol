@@ -24,4 +24,28 @@ contract Auction {
 
     }
 
+    modifier notOwner() {
+        require(msg.sender != owner);
+        _;
+    }
+
+    modifier afterStart() {
+        require(block.number >= startBlock);
+        _;
+    }
+
+    modifier beforeEnd() {
+        require(block.number <= endBlock);
+        _;
+    }
+    function placeBid() payable public notOwner afterStart beforeEnd returns(bool){
+        require(auctionState == AuctionState.Running);
+        require(msg.value > 0.001 ether);
+        uint currentBid = bids[msg.sender] + msg.value;
+
+        require(currentBid > highestBindingBid);
+        bids[msg.sender] = currentBid;
+
+    }
+
 }
